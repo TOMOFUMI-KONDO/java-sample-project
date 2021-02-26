@@ -6,39 +6,49 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 public class VoiceReceiver {
-    private static final int HZ = 8000;
-    private static final int BITS = 16;
-    private static final int MONO = 1;
+    private static final int SERVER_PORT = 10007;
+    private static final int PACKET_SIZE = (int) Math.pow(2, 14);
+    private static final int TIME_OUT_SECOND = 600;
+    private static final int WAIT = 100;
 
-    private static final int PACKET_SIZE = 1024;
-
-    public static void main(String[] args) throws LineUnavailableException, IOException {
-        int port = args.length > 1 ? Integer.parseInt(args[1]) : 10007;
+    public static void main(String[] args) {
         byte[] buffer = new byte[PACKET_SIZE];
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-        VoicePlayer player = new VoicePlayer(HZ, BITS, MONO);
 
-        DatagramSocket socket = new DatagramSocket(port);
-        System.out.println("VoiceReceiverが起動しました。(" + socket.getLocalPort() + ")");
-
-        int count = 0;
-        while (true) {
-            socket.receive(packet);
-            player.play(buffer);
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            count++;
-            if (count > 10 * 100) {
-                player.end();
-                break;
-            }
+        VoicePlayer player;
+        try {
+            player = new VoicePlayer();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+            return;
         }
+        player.start();
 
-        System.out.println("VoiceReceiverが終了しました。");
+        try (DatagramSocket socket = new DatagramSocket(SERVER_PORT)) {
+            System.out.println("VoiceReceiverが起動しました。(port=" + socket.getLocalPort() + ")");
+
+            int count = 0;
+            while (true) {
+                socket.receive(packet);
+                player.setVoice(buffer);
+
+                try {
+                    Thread.sleep(WAIT);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                count++;
+                if (count > (1000 / WAIT) * TIME_OUT_SECOND) {
+                    player.end();
+                }
+
+                if (!player.getIsPlaying()) {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
