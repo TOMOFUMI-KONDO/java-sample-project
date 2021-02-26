@@ -9,9 +9,16 @@ public class EchoServer {
     public static final int ECHO_PORT = 10007;
 
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(ECHO_PORT); Socket socket = serverSocket.accept()) {
+        ServerSocket serverSocket = null;
+        Socket socket = null;
+
+        try {
+            serverSocket = new ServerSocket(ECHO_PORT);
             System.out.println("EchoServerが起動しました(port=" + serverSocket.getLocalPort() + ")");
+
+            socket = serverSocket.accept();
             System.out.println("接続されました" + socket.getRemoteSocketAddress());
+
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             String line;
@@ -23,6 +30,20 @@ public class EchoServer {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (socket != null) {
+                    socket.close();
+                }
+            } catch (IOException e) {
+            }
+
+            try {
+                if (serverSocket != null) {
+                    serverSocket.close();
+                }
+            } catch (IOException e) {
+            }
         }
     }
 }
