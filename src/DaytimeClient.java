@@ -4,15 +4,15 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class DaytimeClient {
-    private static final int PORT = 13;
-
     public static void main(String[] args) {
         Socket socket = null;
 
         try {
             String host = args[0];
-            socket = new Socket(host, (PORT));
-            System.out.println("Connected " + host + ":" + PORT);
+            int port = args.length > 1 ? Integer.parseInt(args[1]) : 13;
+
+            socket = new Socket(host, (port));
+            System.out.println("Connected " + host + ":" + port);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -29,6 +29,7 @@ public class DaytimeClient {
                 }
             } catch (IOException ignored) {
             }
+
             System.out.println("切断されました" + (socket != null ? socket.getRemoteSocketAddress() : ""));
         }
     }
