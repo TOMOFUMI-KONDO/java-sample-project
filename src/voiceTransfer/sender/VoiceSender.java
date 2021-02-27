@@ -7,32 +7,32 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 
 public class VoiceSender {
-    private static final String SERVER_HOST = "localhost";
-    private static final int SERVER_PORT = 10007;
+    private static final String DEFAULT_SERVER_HOST = "localhost";
+    private static final int DEFAULT_SERVER_PORT = 10007;
     private static final int TIME_OUT_SECOND = 60;
     private static final int WAIT = 100;
 
     public static void main(String[] args) {
-        String host = args.length > 0 ? args[0] : SERVER_HOST;
-        int port = args.length > 1 ? Integer.parseInt(args[1]) : SERVER_PORT;
-        InetSocketAddress address = new InetSocketAddress(host, port);
+        final String host = args.length > 0 ? args[0] : DEFAULT_SERVER_HOST;
+        final int port = args.length > 1 ? Integer.parseInt(args[1]) : DEFAULT_SERVER_PORT;
+        final InetSocketAddress address = new InetSocketAddress(host, port);
 
         VoiceListener listener;
         try {
             listener = new VoiceListener();
-        } catch (IOException | LineUnavailableException e) {
+        } catch (LineUnavailableException e) {
             e.printStackTrace();
             return;
         }
         listener.start();
 
-        try (DatagramSocket socket = new DatagramSocket()) {
-            System.out.println("VoiceSenderが起動しました(host=" + host + ",port= " + SERVER_PORT + ")");
+        try (final DatagramSocket socket = new DatagramSocket()) {
+            System.out.println("VoiceSenderが起動しました(host=" + host + ",port= " + port + ")");
 
             int count = 0;
             while (true) {
-                byte[] voice = listener.getVOICE();
-                DatagramPacket packet = new DatagramPacket(voice, voice.length, address);
+                final byte[] voice = listener.getVoice();
+                final DatagramPacket packet = new DatagramPacket(voice, voice.length, address);
 
                 try {
                     socket.send(packet);

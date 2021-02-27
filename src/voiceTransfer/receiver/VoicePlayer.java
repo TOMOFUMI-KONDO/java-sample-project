@@ -7,7 +7,7 @@ public class VoicePlayer extends Thread {
     private static final int BITS = 16;
     private static final int MONO = 1;
 
-    private final SourceDataLine SOURCE;
+    private final SourceDataLine source;
     private boolean isPlaying;
     private byte[] voice = new byte[HZ * BITS / 8 * MONO];
 
@@ -17,16 +17,16 @@ public class VoicePlayer extends Thread {
         AudioFormat linear = new AudioFormat(HZ, BITS, MONO, true, false);
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, linear);
 
-        this.SOURCE = (SourceDataLine) AudioSystem.getLine(info);
-        this.SOURCE.open(linear);
-        this.SOURCE.start();
+        this.source = (SourceDataLine) AudioSystem.getLine(info);
+        this.source.open(linear);
+        this.source.start();
     }
 
     public void run() {
         while (true) {
             if (!this.isPlaying) return;
 
-            this.SOURCE.write(this.voice, 0, this.voice.length);
+            this.source.write(this.voice, 0, this.voice.length);
         }
     }
 
@@ -36,8 +36,8 @@ public class VoicePlayer extends Thread {
 
     public void end() {
         this.isPlaying = false;
-        this.SOURCE.stop();
-        this.SOURCE.close();
+        this.source.stop();
+        this.source.close();
     }
 
     public boolean getIsPlaying() {

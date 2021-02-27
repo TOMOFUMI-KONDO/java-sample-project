@@ -12,8 +12,8 @@ public class VoiceReceiver {
     private static final int WAIT = 100;
 
     public static void main(String[] args) {
-        byte[] buffer = new byte[PACKET_SIZE];
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+        final byte[] buffer = new byte[PACKET_SIZE];
+        final DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
         VoicePlayer player;
         try {
@@ -24,11 +24,13 @@ public class VoiceReceiver {
         }
         player.start();
 
-        try (DatagramSocket socket = new DatagramSocket(SERVER_PORT)) {
+        try (final DatagramSocket socket = new DatagramSocket(SERVER_PORT)) {
             System.out.println("VoiceReceiverが起動しました。(port=" + socket.getLocalPort() + ")");
 
             int count = 0;
             while (true) {
+                // fixme(kondo):
+                //  packetを受信しないとcountが増加しないようになっているので、packetの受信に関係なくcountを増加させる。
                 socket.receive(packet);
                 player.setVoice(buffer);
 
